@@ -8,6 +8,9 @@ on:
     branches-ignore:
       - main
 
+permissions:
+  contents: read
+
 jobs:
   lint:
     name: Lint Code Base
@@ -21,13 +24,16 @@ jobs:
     steps:
       - name: Checkout
         id: checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
+        with:
+          # Full history so super-linter can resolve the default branch as its diff base
+          fetch-depth: 0
 
       - name: Setup Node.js
         id: setup-node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: 21
+          node-version: 24
           cache: npm
 
       - name: Install Dependencies
@@ -42,3 +48,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TYPESCRIPT_DEFAULT_STYLE: prettier
           VALIDATE_JSCPD: false
+          # Only lint files changed vs the default branch (v6 defaults to the whole codebase)
+          VALIDATE_ALL_CODEBASE: false
+          # Bundled actionlint in super-linter v6 doesn't recognize node24 yet
+          VALIDATE_GITHUB_ACTIONS: false
